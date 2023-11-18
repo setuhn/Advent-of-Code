@@ -1,46 +1,81 @@
-# -*- coding: utf-8 -*-
 """
 Created on Fri Dec 30 16:42:39 2022
 
 @author: Setuhn
 """
-import sympy as sym
 
-ingredients = {}
+import numpy as np
+import heapq
 
-with open('input_15_test.txt') as data:
+teaspoons_total = 100
+
+
+def score_total(teaspoons: np.array, properties_values_np: np.array, ) -> int:
+
+    return np.prod(np.matmul(teaspoons, properties_values_np).clip(0))
+
+def get_next_tespoons_distrib(teaspoons):
+    teaspoons_distrib = []
+    
+    for idx in range(len(teaspoons)):
+        
+        teaspoons_distrib += [[t+1 if i == idx else t for i, t in enumerate(teaspoons)]]
+        
+    return teaspoons_distrib
+        
+
+
+properties_values = []
+
+with open('input_15') as data:
     for line in data.readlines():
-        name, capacity, durability, flavor, texture, calories = [int(word.strip(',')) if word.strip(',-').isdigit() else word.strip(':') for idx, word in enumerate(line.strip().split(' ')) if idx in [0, 2, 4, 6, 8, 10]]
+        name = line.strip().split(' ')[0]
+        properties = [int(word.strip(',')) for idx, word in enumerate(line.strip().split(' ')) if idx in [2, 4, 6, 8, 10]]
         
-        ingredients[name] = (capacity, durability, flavor, texture, calories)
+        properties_values.append(properties[:-1])
+
+# Value for each property of each ingredient        
+properties_values_np = np.array(properties_values)
+
+# Quue for the A* algo
+path_q = []
+heapq.heappush(path_q, (0, [0]*properties_values_np.shape[0]))
+
+# Answer to part 1
+score_final = 0
+teaspoons_final = []
+
+visited = []
+
+while path_q:
+    _, teaspoons_current = heapq.heappop(path_q)
+    
+    score_current = score_total(teaspoons_current, properties_values_np)
+
+    
+    if score_final < score_current and sum(teaspoons_current) == teaspoons_total:
+        score_final = score_current
+        teaspoons_final = teaspoons_current
+        continue
         
-teaspoons = 100
-# sym = []
 
-# TODO automatise the functon creation
-# for name in ingredients:
-#     ingredients[name] = ingredients[name] + tuple([sym.Symbol('x')])
+    teaspoons_next = get_next_tespoons_distrib(teaspoons_current)
     
-x = sym.Symbol('x', real=True)
-y = sym.Symbol('y', real=True)
-
-f_capacity = -x + 2 * y
-f_durability = -2 * x + 3 * y
-f_flavor = 6 * x + -2 * y
-f_texture = 3 * x -y
-
-f_score = f_capacity * f_durability * f_flavor * f_texture
-f_score_x = f_score.xreplace({y : 100-x})
-
-fp_score_x = sym.diff(f_score_x, x)
-
-scores = []
-
-for result in sym.solve(fp_score_x, x):
+    for teaspoons in teaspoons_next:
+        if sum(teaspoons) > teaspoons_total:
+            continue
+        
+        elif teaspoons not in visited:
+            
+            heapq.heappush(path_q, (-score_current, teaspoons))
+            visited += [teaspoons]
+        
+        
+print(score_final, teaspoons_final)    
     
-    candidate = int(round(result.evalf()))
+        
     
-    scores.append(f_score_x.subs(x, candidate))
-    
-print(max(scores))
-    
+
+
+
+

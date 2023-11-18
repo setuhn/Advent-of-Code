@@ -1,0 +1,22 @@
+Theory
+- path finding algo (A*, Dijkstra, breadth/depth search) https://www.geeksforgeeks.org/breadth-first-search-or-bfs-for-a-graph/, https://www.geeksforgeeks.org/depth-first-search-or-dfs-for-a-graph/
+- bitwise operations
+- set operations
+- recursion
+- binary search instead of x in lst
+
+Functional
+- map() -> list comprehension
+- filter() -> list comprehension
+- reduce() -> functools
+- itertools
+- regular expressions: https://regexr.com/
+
+Tools
+- itertools
+- pandas
+- numpy
+- collections
+- re
+- string
+- heapq

@@ -3,20 +3,21 @@ Theory
 - bitwise operations
 - set operations
 - recursion
-- binary search instead of x in lst
+- binary search instead of x in lst or use sets for fast searching
+- Dynamic Programming
 
 Functional
 - map() -> list comprehension
 - filter() -> list comprehension
 - reduce() -> functools
 - itertools
-- regular expressions: https://regexr.com/
+- regular expressions: https://regexr.com/ and https://regex101.com/
 
 Tools
 - itertools
 - pandas
 - numpy
-- collections
+- collections (deque -> rotating deque, Josephus Permutation)
 - re
 - string
 - heapq

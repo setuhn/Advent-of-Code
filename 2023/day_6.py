@@ -21,13 +21,12 @@ def calculate_ways(time, distance):
 if __name__ == '__main__':
 
     with open(f'day_6.txt') as data:
-        # table = [line.split(': ')[1].strip().split(' ') for line in data.read().strip().split('\n')]
         lines_list = data.readlines()
         time_1, distance_1 = [[int(n) for n in re.findall(r'(\d+)', line.strip())] for line in lines_list]
         time_2, distance_2 = [int(''.join(re.findall(r'(\d+)', line.strip()))) for line in lines_list]
 
         print(f'Answer to part 1: {calculate_ways(time_1, distance_1)}')
-        print(f'Answer to part 1: {calculate_ways([time_2], [distance_2])}')
+        print(f'Answer to part 2: {calculate_ways([time_2], [distance_2])}')
 
 
 

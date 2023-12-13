@@ -82,7 +82,7 @@ if __name__ == '__main__':
     print(f'Answer to part 1: {len(circuit)//2}')
 
     # Area = 1/2 * sum[ (x1*y2 + x2*y3 ... xn*y1) - (y1*x2 + y2*x3 ... yn*x1)]
-    # Then, we need to remove all the area taken by the pipe: 
+    # Then, we need to remove all the area taken by the pipes: 
     circuit_backtrack = circuit + [coordinate_start]
     sum_1 = sum([circuit_backtrack[idx][0] * circuit_backtrack[idx+1][1] for idx, _ in enumerate(circuit_backtrack[:-1])])
     sum_2 = sum([circuit_backtrack[idx][1] * circuit_backtrack[idx+1][0] for idx, _ in enumerate(circuit_backtrack[:-1])])

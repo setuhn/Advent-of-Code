@@ -118,7 +118,7 @@ if __name__ == '__main__':
 
     summary = sum([find_symmetry_axe(pattern) for pattern in patterns_pair])
     print(f'Answer part 1: {summary}')
-    # Part 2: find reflection where diff between array is 1 -> abs(sum(array1 - array2)) = 1 
 
+    # Part 2: find reflection where diff between array is 1 -> sum(abs(array1 - array2)) = 1 
     summary_2 = sum([find_symmetry_axe_smudge(pattern, 1) for pattern in patterns_pair])
     print(f'Answer part 1: {summary_2}')

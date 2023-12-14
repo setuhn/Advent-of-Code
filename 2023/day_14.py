@@ -6,23 +6,7 @@ ROCKS = {
     '.': 1
 }
 
-def invert_coordinates(coordinates_list):
-    coordinates_list = [[col, row] for row, col in coordinates_list]
-    coordinates_list.sort()
-
-    return coordinates_list
-
-# Part 1 could be solved by iterating over each line and col at the beginning and looking backward for each char 
-# 'O' if there is space to fall -> one loop solving however, this would not be a very flexible solution
-if __name__ == '__main__':
-    plateform = []
-
-    with open(f'day_14.txt') as data:
-        for line in data.readlines():
-            plateform.append([ROCKS[char] for char in line.strip()])
-
-    plateform_array = np.array(plateform)
-
+def tilt_platform(plateform_array):
     # Find out where the square rocks are
     # Divide the columns at their idx 
     # Order the chunks
@@ -41,8 +25,60 @@ if __name__ == '__main__':
         else:
             plateform_array[:, idx_col] = np.sort(plateform_array[:, idx_col])
 
+    return plateform_array
+
+def cycle(plateform_array):
+    plateform_array = tilt_platform(plateform_array)
+
+    for _ in range(3):
+        plateform_array = tilt_platform(np.rot90(plateform_array, -1))
+
+    return np.rot90(plateform_array, -1)
+
+def calculate_load(plateform_array):
     load = 0
     for idx_row in range(plateform_array.shape[1]):
-        load += len(np.argwhere(plateform_array[idx_row, :] ==0)) * (plateform_array.shape[1] - idx_row)
+        load += np.count_nonzero(plateform_array[idx_row, :] ==0) * (plateform_array.shape[1] - idx_row)
+    
+    return load
 
-    print(f'Answer to part 1: {load}')
+# Part 1 could be solved by iterating over each line and col at the beginning and looking backward for each char 
+# 'O' if there is space to fall -> one loop solving however, this would not be a very flexible solution
+if __name__ == '__main__':
+    plateform = []
+
+    with open(f'day_14.1-test.txt') as data:
+        for line in data.readlines():
+            plateform.append([ROCKS[char] for char in line.strip()])
+
+    plateform_array = np.array(plateform)
+
+    plateform_array_tilted = tilt_platform(np.copy(plateform_array))
+    
+    print(f'Answer to part 1: {calculate_load(plateform_array_tilted)}')
+
+    # Part 2: make part 1 as a function -> rotate 90° between each call to the function
+    # 94941 and 95024 too low
+    history = []
+    number_cycles = 1000000000
+    cyclic = False
+    for _ in range(number_cycles):
+        
+        plateform_array = cycle(plateform_array)
+
+        for idx_h, plateform in enumerate(history):
+
+            if np.array_equal(plateform, plateform_array):
+                cyclic = idx_h
+                break
+
+        if cyclic != False:
+            break
+        
+        else:
+            history.append(np.copy(plateform_array))
+
+    cyclic_history = history[cyclic:]
+    num = (number_cycles - len(history)) % len(cyclic_history)
+
+    print(f'Answer to part 2: {calculate_load(history[num])}')

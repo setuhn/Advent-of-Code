@@ -28,17 +28,16 @@ def tilt_platform(plateform_array):
     return plateform_array
 
 def cycle(plateform_array):
-    plateform_array = tilt_platform(plateform_array)
 
-    for _ in range(3):
-        plateform_array = tilt_platform(np.rot90(plateform_array, -1))
+    for _ in range(4):
+        plateform_array = np.rot90(tilt_platform(plateform_array), -1)
 
-    return np.rot90(plateform_array, -1)
+    return plateform_array
 
 def calculate_load(plateform_array):
     load = 0
     for idx_row in range(plateform_array.shape[1]):
-        load += np.count_nonzero(plateform_array[idx_row, :] ==0) * (plateform_array.shape[1] - idx_row)
+        load += np.count_nonzero(plateform_array[idx_row, :] == 0) * (plateform_array.shape[1] - idx_row)
     
     return load
 
@@ -47,7 +46,7 @@ def calculate_load(plateform_array):
 if __name__ == '__main__':
     plateform = []
 
-    with open(f'day_14.1-test.txt') as data:
+    with open(f'day_14.txt') as data:
         for line in data.readlines():
             plateform.append([ROCKS[char] for char in line.strip()])
 
@@ -80,7 +79,7 @@ if __name__ == '__main__':
 
     cyclic_history = history[cyclic_idx:]
 
-    num = (number_cycles - len(history)) % len(cyclic_history)
-    print([calculate_load(h) for h in history])
+    num = (number_cycles - cyclic_idx - 1) % len(cyclic_history)
+    # print([calculate_load(h) for h in cyclic_history])
 
-    print(f'Answer to part 2: {calculate_load(history[num])}')
+    print(f'Answer to part 2: {calculate_load(cyclic_history[num])}')

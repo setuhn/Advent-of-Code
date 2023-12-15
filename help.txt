@@ -21,3 +21,4 @@ Tools
 - re
 - string
 - heapq
+- Numba

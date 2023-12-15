@@ -11,14 +11,14 @@ def tilt_platform(plateform_array):
     # Divide the columns at their idx 
     # Order the chunks
     for idx_col in range(plateform_array.shape[1]):
-        delimiters = [d[0] for d in np.argwhere(plateform_array[:, idx_col] == 2)]
+        delimiters = np.where(plateform_array[:, idx_col] == 2)[0].tolist()
 
         if delimiters:
+            
             plateform_array[:delimiters[0], idx_col] = np.sort(plateform_array[:delimiters[0], idx_col])
         
-            for idx_del, delimiter in enumerate(delimiters):
-                if delimiter != 0:
-                    plateform_array[delimiters[idx_del - 1]+1:delimiter, idx_col] = np.sort(plateform_array[delimiters[idx_del - 1]+1:delimiter, idx_col])
+            for idx_del, delimiter in enumerate(delimiters[1:], 1):
+                plateform_array[delimiters[idx_del - 1]+1:delimiter, idx_col] = np.sort(plateform_array[delimiters[idx_del - 1]+1:delimiter, idx_col])
             
             plateform_array[delimiters[-1] + 1:, idx_col] = np.sort(plateform_array[delimiters[-1] + 1:, idx_col])
         
@@ -61,7 +61,7 @@ if __name__ == '__main__':
     # 94941 and 95024 too low
     history = []
     number_cycles = 1000000000
-    cyclic = False
+    cyclic_idx = False
     for _ in range(number_cycles):
         
         plateform_array = cycle(plateform_array)
@@ -69,16 +69,18 @@ if __name__ == '__main__':
         for idx_h, plateform in enumerate(history):
 
             if np.array_equal(plateform, plateform_array):
-                cyclic = idx_h
+                cyclic_idx = idx_h
                 break
 
-        if cyclic != False:
+        if cyclic_idx != False:
             break
         
         else:
             history.append(np.copy(plateform_array))
 
-    cyclic_history = history[cyclic:]
+    cyclic_history = history[cyclic_idx:]
+
     num = (number_cycles - len(history)) % len(cyclic_history)
+    print([calculate_load(h) for h in history])
 
     print(f'Answer to part 2: {calculate_load(history[num])}')

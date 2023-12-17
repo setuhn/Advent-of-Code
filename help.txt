@@ -2,9 +2,9 @@ Theory
 - path finding algo (A*, Dijkstra, breadth/depth search) https://www.geeksforgeeks.org/breadth-first-search-or-bfs-for-a-graph/, https://www.geeksforgeeks.org/depth-first-search-or-dfs-for-a-graph/
 - bitwise operations
 - set operations
-- recursion
 - binary search instead of x in lst or use sets for fast searching
 - Dynamic Programming
+- imaginry numbers for directions or coordinates (https://realpython.com/python-complex-numbers)
 
 Functional
 - map() -> list comprehension

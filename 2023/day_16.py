@@ -94,7 +94,7 @@ def get_next_nodes(node, layout_array):
     return next_nodes
 
 # Part 1 could be done by coding the trajectory (coordinates and direction) of the beam(s) with complex numbers (x = real, y = img; *j = -90° *-j = 90°, *-1 = +180°)
-# For flexibility a 'linked nodes' approach will be taken (useful for part 2?)
+# For flexibility a 'linked nodes' approach will be taken (useful for part 2? I really hope so...)
 if __name__ == '__main__':
 
     layout = []

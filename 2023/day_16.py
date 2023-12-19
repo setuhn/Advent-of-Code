@@ -6,157 +6,122 @@ class Node:
     def __init__(self, char, coordinates):
         self.char = char
         self.coordinates = coordinates
-        # reference to next nodes as key = coordinates_entry, value = (node_next, distance)
-        self.next_node_from = {}
+        # reference to next nodes as key = direction_entry, value = (node_next, [linking cells])
+        self.next_node_coor_from = {}
 
-# return the next dict for the given node
+# return the next dict for the given node as 
 def get_next_nodes(node, layout_array):
-    next_nodes = {}
-    next_nodes_list = {}
+    next_nodes_coor = {}
+    next_nodes_coor_list = {}
     idx_line, idx_col = node.coordinates
     boundary_line, boundary_col = layout_array.shape
 
-    next_nodes_list['down'] = layout_array[idx_line+1:, idx_col][layout_array[idx_line+1:, idx_col] != None] #-> [0]
-    next_nodes_list['up'] = layout_array[:idx_line, idx_col][layout_array[:idx_line, idx_col] != None] #-> [-1]
-    next_nodes_list['right'] = layout_array[idx_line, idx_col+1:][layout_array[idx_line, idx_col+1:] != None] # -> [0]
-    next_nodes_list['left'] = layout_array[idx_line, :idx_col][layout_array[idx_line, :idx_col] != None] # -> [-1]
+    next_nodes_coor_list['down'] = layout_array[idx_line+1:, idx_col][(layout_array[idx_line+1:, idx_col] != None)] #-> [0]
+    next_nodes_coor_list['up'] = layout_array[:idx_line, idx_col][(layout_array[:idx_line, idx_col] != None)] #-> [-1]
+    next_nodes_coor_list['right'] = layout_array[idx_line, idx_col+1:][(layout_array[idx_line, idx_col+1:] != None)] # -> [0]
+    next_nodes_coor_list['left'] = layout_array[idx_line, :idx_col][(layout_array[idx_line, :idx_col] != None)] # -> [-1]
     
-    down_node = next_nodes_list['down'][0] if any(next_nodes_list['down']) else (boundary_line-1, idx_col)
-    up_node = next_nodes_list['up'][-1] if any(next_nodes_list['up']) else (0, idx_col)
-    right_node = next_nodes_list['right'][0] if any(next_nodes_list['right']) else (idx_line, boundary_col-1)
-    left_node = next_nodes_list['left'][-1] if any(next_nodes_list['left']) else (idx_line, 0)
+    next_down = (next_nodes_coor_list['down'][0].coordinates if any(next_nodes_coor_list['down']) else (boundary_line-1, idx_col), 1+0j)
+    next_up = (next_nodes_coor_list['up'][-1].coordinates if any(next_nodes_coor_list['up']) else (0, idx_col), -1+0j)
+    next_right = (next_nodes_coor_list['right'][0].coordinates if any(next_nodes_coor_list['right']) else (idx_line, boundary_col-1), 0+1j)
+    next_left = (next_nodes_coor_list['left'][-1].coordinates if any(next_nodes_coor_list['left']) else (idx_line, 0), 0-1j)
 
     if node.char == '|':
         
-        if down_node:
-            next_nodes[down_node] = [up_node]
-
-        if up_node:
-            next_nodes[up_node] = [down_node]
-
-        if right_node:
-            next_nodes[right_node] = [up_node, down_node]
-
-        if left_node:
-            next_nodes[left_node] = [up_node, down_node]
-
-        elif idx_line == 0:
-            next_nodes['start'] = [down_node]
+        next_nodes_coor[-1+0j] = [next_up]
+        next_nodes_coor[1+0j] = [next_down]
+        next_nodes_coor[0-1j] = [next_up, next_down]
+        next_nodes_coor[0+1j] = [next_up, next_down]
 
     elif node.char == '-':
 
-        if down_node:
-            next_nodes[down_node] = [left_node, right_node]
-
-        if up_node:
-            next_nodes[up_node] = [left_node, right_node]
-
-        if right_node:
-            next_nodes[right_node] = [left_node]
-
-        if left_node:
-            next_nodes[left_node] = [right_node]
-
-        elif idx_line == 0:
-            next_nodes['start'] = [right_node]
+        next_nodes_coor[-1+0j] = [next_left, next_right]
+        next_nodes_coor[1+0j] = [next_left, next_right]
+        next_nodes_coor[0-1j] = [next_left]
+        next_nodes_coor[0+1j] = [next_right]
 
     elif node.char == '\\':
-
-        if down_node:
-            next_nodes[down_node] = [left_node]
-
-        if up_node:
-            next_nodes[up_node] = [right_node]
-
-        if right_node:
-            next_nodes[right_node] = [up_node]
-
-        if left_node:
-            next_nodes[left_node] = [down_node]
-
-        elif idx_line == 0:
-            next_nodes['start'] = [down_node]
+            
+        next_nodes_coor[-1+0j] = [next_left]
+        next_nodes_coor[1+0j] = [next_right]
+        next_nodes_coor[0-1j] = [next_up]
+        next_nodes_coor[0+1j] = [next_down]
 
     elif node.char == '/':
 
-        if down_node:
-            next_nodes[down_node] = [right_node]
+        next_nodes_coor[-1+0j] = [next_right]
+        next_nodes_coor[1+0j] = [next_left]
+        next_nodes_coor[0-1j] = [next_down]
+        next_nodes_coor[0+1j] = [next_up]
 
-        if up_node:
-            next_nodes[up_node] = [left_node]
-
-        if right_node:
-            next_nodes[right_node] = [down_node]
-
-        if left_node:
-            next_nodes[left_node] = [up_node]
-
-    return next_nodes
+    return next_nodes_coor
 
 # Part 1 could be done by coding the trajectory (coordinates and direction) of the beam(s) with complex numbers (x = real, y = img; *j = -90° *-j = 90°, *-1 = +180°)
-# For flexibility a 'linked nodes' approach will be taken (useful for part 2? I really hope so...)
+# For flexibility a 'linked nodes', hashmap and complex numbers approach will be taken (useful for part 2? YES, this first approach was tried and is ok for part 1 but would take too long for part 2)
 if __name__ == '__main__':
 
-    layout = []
+    layout_nodes = {}
+    layout_array = []
 
     with open(f'day_16.1-test.txt') as data:
         
         for idx_line, line in enumerate(data.readlines()):
-            layout.append([Node(char, (idx_line, idx_col)) if char != '.' else None for idx_col, char in enumerate(line.strip())])
+            layout_array.append([Node(char, (idx_line, idx_col)) if char != '.' else None for idx_col, char in enumerate(line.strip())])
 
-    layout_array = np.array(layout)
-    coordinates_mirrors_splitters = np.argwhere(layout_array != None)
+            for idx_col, char in enumerate(line.strip()):
+                if char != '.':
+                    layout_nodes[idx_line + idx_col * 1j] = layout_array[idx_line][idx_col]
 
+    layout_array = np.array(layout_array)
 
-    for coordinates in coordinates_mirrors_splitters.tolist():
-        node = layout_array[coordinates[0],  coordinates[1]]
-        next_nodes = get_next_nodes(node, layout_array)
-        node.next_node_from = next_nodes
+    for coordinates, node in layout_nodes.items():
+        node.next_node_coor_from = get_next_nodes(node, layout_array)
     
-    first_node = layout_array[coordinates_mirrors_splitters[0][0], coordinates_mirrors_splitters[0][1]]
+    first_node = layout_array[0, layout_array[0, :] != None][0]
+    direction = 0+1j
     print()
-    print(first_node.next_node_from)
+    print(first_node.next_node_coor_from[direction])
     print()
-    energised_tiles = set()
-    beams_list = deque()
-    beams_list.append(['start', first_node])
-    history = [['start', first_node]]
+    # energised_tiles = set()
+    # beams_list = deque()
+    # beams_list.append(['start', first_node])
+    # history = [['start', first_node]]
 
-    while beams_list:
-        previous_node, current_node = beams_list.popleft()
+    # while beams_list:
+    #     previous_node, current_node = beams_list.popleft()
 
-        # print(f'List of beams {beams_list}')
+    #     # print(f'List of beams {beams_list}')
 
-        while current_node != None:
+    #     while current_node != None:
 
-            next_node, *other_nodes = current_node.next_node_from[previous_node]
+    #         next_node, *other_nodes = current_node.next_node_from[previous_node]
 
-            print(f'{current_node} leads to {next_node} and {other_nodes} from {previous_node}')
+    #         print(f'{current_node} leads to {next_node} and {other_nodes} from {previous_node}')
 
-            if other_nodes:
+    #         if other_nodes:
 
-                for node in other_nodes:
+    #             for node in other_nodes:
 
-                    if [current_node, node] not in history:
+    #                 if [current_node, node] not in history:
 
-                        beams_list.append([current_node, node])
-                        history.append([current_node, node])
+    #                     beams_list.append([current_node, node])
+    #                     history.append([current_node, node])
                                       
-            if next_node:
+    #         if next_node:
 
-                print(f'Next coordinates: {next_node.coordinates}')
+    #             print(f'Next coordinates: {next_node.coordinates}')
 
-                if [current_node.coordinates, next_node.coordinates] in history:
-                    break
+    #             if [current_node.coordinates, next_node.coordinates] in history:
+    #                 break
                 
-                else:
+    #             else:
 
-                    history.append([current_node, next_node])
-                    previous_node, current_node = current_node, next_node
+    #                 history.append([current_node, next_node])
+    #                 previous_node, current_node = current_node, next_node
 
-            else:
-                break
+    #         else:
+    #             break
 
-    print(len(history))
+    # print(len(history))
 
             

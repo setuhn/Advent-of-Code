@@ -24,7 +24,7 @@ def get_next_coor_direct_from(path, boundary):
 
     return next_coordinates_directions
 
-### REVIEW this binary search
+### REVIEW this binary search or -> bisect.bisect_left
 def insert_path_in(path, path_list: deque) -> None:
     print('insert')
     heat_loss = path[0]

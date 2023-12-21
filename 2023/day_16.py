@@ -113,7 +113,7 @@ def find_cells_between_coordinates(coor1, coor2):
         print('ERROR')
 
 # Part 1 could be done by coding the trajectory (coordinates and direction) of the beam(s) with complex numbers (x = real, y = img; *j = -90° *-j = 90°, *-1 = +180°)
-# For flexibility a 'linked nodes', hashmap and complex numbers approach will be taken (useful for part 2? YES, this first approach was tried and is ok for part 1 but would take too long for part 2)
+# For flexibility a 'linked nodes', hashmap and complex numbers approach will be taken (useful for part 2? YES, this first approach was tried (day_16-part-1.py) and is ok for part 1 but would take too long for part 2)
 if __name__ == '__main__':
 
     layout_nodes = {}
@@ -137,7 +137,7 @@ if __name__ == '__main__':
     print(f'Answer to part 1: {part_1((0, 0), 0+1j)}')
 
     E = 0
-    
+
     for direction in [(0+1j), (1+0j), (0-1j), (-1+0j)]:
         size = layout_array.shape[abs(int(direction.imag))]
 

@@ -1,5 +1,6 @@
 
 from collections import deque
+import bisect
 
 ADJACENT = [
     (0+1j),
@@ -12,7 +13,7 @@ def distance_coor(coor1, coor2):
     return abs(int(coor1.real - coor2.real)) + abs(int(coor1.imag - coor2.imag))
 
 def get_next_coor_direct_from(path, boundary):
-    _, _, coordinates, direction, countdown = path
+    _, _, _, coordinates, direction, countdown = path
 
     next_coordinates_directions = [(coordinates + direct, direct) for direct in ADJACENT 
                         if (direct != -1 * direction) 
@@ -24,51 +25,16 @@ def get_next_coor_direct_from(path, boundary):
 
     return next_coordinates_directions
 
-### REVIEW this binary search or -> bisect.bisect_left
-def insert_path_in(path, path_list: deque) -> None:
-    print('insert')
-    heat_loss = path[0]
-    distance = path[1]
+def get_score(distance, heat_loss_tot):
+    return distance + 0*heat_loss_tot
 
-    if heat_loss < path_list[0][0] or heat_loss == path_list[0][0] and distance < path_list[0][1]:
-        path_list.appendleft(path)
-    
-    elif heat_loss > path_list[-1][0] or heat_loss == path_list[-1][0] and distance < path_list[-1][1]:
-        path_list.append(path)
-
-    else:
-        find = False
-        idx_i = 0
-        idx_f = len(path_list)
-
-        while not find:
-            if idx_i == idx_f:
-                path_list.insert(idx_i, path)
-            else:
-                idx_new = (idx_f - idx_i) // 2
-
-                if heat_loss == path_list[idx_new][0]:
-
-                    if distance < path_list[idx_new][1]:
-                        idx_f = idx_new-1
-                
-                    elif distance > path_list[idx_new][1]:
-                        idx_i = idx_new+1
-
-                elif heat_loss < path_list[idx_new][0]:
-                    idx_f = idx_new-1
-                
-                elif heat_loss > path_list[idx_new][0]:
-                    idx_i = idx_new+1
-
-
-
-# Part 1: pathfinding (A*, breadth search with minimise the sum of heat loss and distance)
+# Part 1: pathfinding (A*, breadth search with minimise the heat loss and distance)
+# 1267, 1241
 if __name__ == '__main__':
 
     map_heat_loss = {}
 
-    with open(f'day_17.1-test.txt') as data:
+    with open(f'day_17.txt') as data:
 
         for idx_line, line in enumerate(data.readlines()):
 
@@ -89,36 +55,57 @@ if __name__ == '__main__':
     
     for direction in direction_list:
 
-        path_sorted_list.append((map_heat_loss[start_cell], distance_coor(start_cell, end_cell), start_cell, direction, countdown)) # heat_loss_tot, distance, coordinates, direction, countdown
-        history.update([(start_cell, direction, map_heat_loss[start_cell])]) #coordinates, direction, heat_loss_tot
+        path_sorted_list.append((0, distance_coor(start_cell, end_cell), map_heat_loss[start_cell], start_cell, direction, countdown)) # score, distance, heat_loss_tot, coordinates, direction, countdown
+        history.update([(start_cell, direction, map_heat_loss[start_cell])]) # coordinates, direction, heat_loss_tot
 
-    # print(history)
+    min_heat_loss = int(end_cell.real * 10 + end_cell.imag * 10)
 
+    counter = 0
     while path_sorted_list:
-
+        counter += 1
+        # Get current path
         current_path = path_sorted_list.popleft()
-
-        next_countdown = current_path[4] -1 if current_path[4] > 0 else countdown_max
-
+        # Calculate next countdown
+        next_countdown = current_path[-1] -1 if current_path[-1] > 0 else countdown_max
+        # If min_heat_loss is lower than the current heat loss, prune this branch
+        if min_heat_loss < current_path[2]:
+            continue
+        
+        # Explore each different possible direction
         for next_coordinates, next_direction in get_next_coor_direct_from(current_path, end_cell):
 
-            next_heat_loss_tot = current_path[0] + map_heat_loss[next_coordinates]
-            next_distance = distance_coor(end_cell, next_coordinates)
+            # Calculate next heat loss
+            next_heat_loss_tot = current_path[2] + map_heat_loss[next_coordinates]
 
+            # If heat loss is higher than min_heat_loss, prune this branch
+            if min_heat_loss < next_heat_loss_tot:
+                continue
+
+            # If the coordinates are the end cell pass to the next branch
             if next_coordinates == end_cell:
-                print(next_heat_loss_tot, next_distance, next_coordinates, next_direction, next_countdown)
-                path_sorted_list = ()
-                break
 
+                print(next_heat_loss_tot, len(path_sorted_list), counter)
+
+
+                # Update the min_heat_loss if it is too high
+                if min_heat_loss > next_heat_loss_tot:
+                    min_heat_loss = next_heat_loss_tot
+
+                continue
+
+            # If the branch is already recorded, prune this branch
             if (next_coordinates, next_direction, next_heat_loss_tot) in history:
                 continue
 
             else:
-                # print(history)
+                # Update history
                 history.update([(next_coordinates, next_direction, next_heat_loss_tot)])
-                next_path = (next_heat_loss_tot, next_distance, next_coordinates, next_direction, next_countdown)
+                # Calculate next distance
+                next_distance = distance_coor(end_cell, next_coordinates)
+                # Construct the next path
+                next_path = (get_score(next_distance, next_heat_loss_tot), next_distance, next_heat_loss_tot, next_coordinates, next_direction, next_countdown)
+                # Find where to insert the new branch (1: distance, 2: heat loss)
+                insert_idx = bisect.insort_left(path_sorted_list, next_path, key=lambda r: (r[0], r[2], r[1]))
 
-                insert_path_in(next_path, path_sorted_list)
-
-                # print(next_path)
-            
+    print()
+    print(counter)

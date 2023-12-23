@@ -1,10 +1,13 @@
 import re
+import timeit
+start = timeit.default_timer()
 
 class Workflow():
-    def __init__(self, name, refuse, logic) -> None:
+    def __init__(self, name, refuse, logic, root = None) -> None:
         self.name = name
         self.refuse = refuse
         self.logic = logic
+        self.root = root
 
     def evaluate(self, part):
         for evaluation in self.logic:
@@ -19,6 +22,15 @@ class Workflow():
 def calculate_sum_rating_scores(accepted_parts):
     return sum([sum([rating for rating in part.values()]) for part in accepted_parts])
 
+def update_ranges(ratings_range, evaluation):
+    rating, comparison, num, _ = evaluation
+
+    if comparison == '<':
+        ratings_range[rating].intersection_update(range(1, num))
+
+    elif comparison == '>':
+        ratings_range[rating].intersection_update(range(num + 1, 4001))
+
 # Inspiration from day 10 for the area calculation
 if __name__ == '__main__':
 
@@ -29,7 +41,7 @@ if __name__ == '__main__':
     workflows_dict = {}
     parts_list_dict = []
 
-    with open(f'day_19.txt') as data:
+    with open(f'day_19.1-test.txt') as data:
         workflows_list, parts_list = [chunk.split('\n') for chunk in data.read().strip().split('\n\n')]
 
     for workflow in workflows_list:
@@ -46,19 +58,72 @@ if __name__ == '__main__':
 
         parts_list_dict.append(part_dict)
 
-    
     accepted_parts = []
 
     for part in parts_list_dict:
         finished = False
-        wf = 'in'
+        workflow_name = 'in'
 
         while not finished:
-            finished, wf = workflows_dict[wf].evaluate(part)
+            finished, workflow_name = workflows_dict[workflow_name].evaluate(part)
 
-        if wf == 'A':
+        if workflow_name == 'A':
             accepted_parts.append(part)
 
     print(f'Answer part 1: {calculate_sum_rating_scores(accepted_parts)}')
+    
 
-    # Part 2: figure out the possible ranges for each rating -> work in reverse -> build a tree and walk back from each 'A' leaves
+    # Part 2: figure out the possible ranges for each rating -> work in reverse -> build a tree and walk back from each 'A' leaves (golden leaves)
+
+    golden_leaves = []
+    for workflow in workflows_dict.values():
+        for evaluation in workflow.logic:
+            if evaluation[-1] not in ['A', 'R']:
+                workflows_dict[evaluation[-1]].root = workflow.name
+
+        if workflow.refuse not in ['A', 'R']:
+            workflows_dict[workflow.refuse].root = workflow.name
+
+        for eval in [evaluation for evaluation in workflow.logic if 'A' in evaluation]:
+            golden_leaves.append([workflow.name, eval])
+            
+
+
+    for leaf in [golden_leaves[1]]:
+        ratings_range = {
+            'x': set(range(1, 4001)),
+            'm': set(range(1, 4001)),
+            'a': set(range(1, 4001)),
+            's': set(range(1, 4001))
+        }
+        
+        current_name, evaluation = leaf
+        update_ranges(ratings_range, evaluation)
+        root = workflows_dict[current_name].root
+
+        while root:
+            
+            evaluation = [evaluation for evaluation in workflows_dict[root].logic if current_name in evaluation]
+
+            if evaluation:
+                print(evaluation)
+                evaluation = evaluation[0]
+                update_ranges(ratings_range, evaluation)
+            
+            elif workflows_dict[root].refuse == current_name:
+                print('refuse')
+            else:
+                print('WHAT')
+
+                break
+
+            root, current_name = workflows_dict[current_name].root, root
+
+            
+
+
+    for r in ratings_range:
+        print(r, min(ratings_range[r]), max(ratings_range[r]))
+
+    # print(f'Answer part 2: {None}')
+    # print(f'Time :{timeit.default_timer() - start} s')

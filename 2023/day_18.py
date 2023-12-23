@@ -1,4 +1,6 @@
 import re
+import timeit
+start = timeit.default_timer()
 
 ROSETTA = {
     'R': 1j,
@@ -45,3 +47,4 @@ if __name__ == '__main__':
 
     print(f'Answer part 1: {area_from_coordinates(coordinates_list)}')
     print(f'Answer part 2: {area_from_coordinates(coordinates_list_swapped)}')
+    print(f'Time :{timeit.default_timer() - start} s')

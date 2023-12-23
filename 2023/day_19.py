@@ -81,15 +81,19 @@ if __name__ == '__main__':
             if evaluation[-1] not in ['A', 'R']:
                 workflows_dict[evaluation[-1]].root = workflow.name
 
+            elif evaluation[-1] == 'A':
+                golden_leaves.append([workflow.name, evaluation])
+
         if workflow.refuse not in ['A', 'R']:
             workflows_dict[workflow.refuse].root = workflow.name
 
-        for eval in [evaluation for evaluation in workflow.logic if 'A' in evaluation]:
-            golden_leaves.append([workflow.name, eval])
+        elif workflow.refuse == 'A':
+                golden_leaves.append([workflow.name, workflow.refuse])
             
+    ratings_range_all = []
 
-
-    for leaf in [golden_leaves[1]]:
+    for leaf in golden_leaves:
+        print(leaf, workflows_dict[leaf[0]].logic)
         ratings_range = {
             'x': set(range(1, 4001)),
             'm': set(range(1, 4001)),
@@ -97,33 +101,37 @@ if __name__ == '__main__':
             's': set(range(1, 4001))
         }
         
-        current_name, evaluation = leaf
-        update_ranges(ratings_range, evaluation)
-        root = workflows_dict[current_name].root
+    #     current_name, evaluation = leaf
+    #     update_ranges(ratings_range, evaluation)
+    #     root = workflows_dict[current_name].root
 
-        while root:
+    #     while root:
             
-            evaluation = [evaluation for evaluation in workflows_dict[root].logic if current_name in evaluation]
+    #         evaluation = [evaluation for evaluation in workflows_dict[root].logic if current_name in evaluation]
 
-            if evaluation:
-                print(evaluation)
-                evaluation = evaluation[0]
-                update_ranges(ratings_range, evaluation)
+    #         if evaluation:
+    #             print(evaluation)
+    #             evaluation = evaluation[0]
+    #             update_ranges(ratings_range, evaluation)
             
-            elif workflows_dict[root].refuse == current_name:
-                print('refuse')
-            else:
-                print('WHAT')
+    #         elif workflows_dict[root].refuse == current_name:
+    #             print('refuse')
+    #         else:
+    #             print('WHAT', root, workflows_dict[root].logic, current_name)
 
-                break
+    #             break
 
-            root, current_name = workflows_dict[current_name].root, root
+    #         root, current_name = workflows_dict[root].root, root
 
             
 
+    # combination = 1
+    # for r in ratings_range:
+    #     print(r, min(ratings_range[r]), max(ratings_range[r]))
+    #     combination *=  max(ratings_range[r]) - min(ratings_range[r])
 
-    for r in ratings_range:
-        print(r, min(ratings_range[r]), max(ratings_range[r]))
+    # print(combination)
+    # print(combination < 167409079868000)
 
     # print(f'Answer part 2: {None}')
     # print(f'Time :{timeit.default_timer() - start} s')

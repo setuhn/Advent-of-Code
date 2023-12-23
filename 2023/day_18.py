@@ -1,10 +1,10 @@
 import re
+
 ROSETTA = {
     'R': 1j,
     'L': -1j,
     'D': 1,
     'U': -1
-
 }
 
 COLOUR2DIR = {
@@ -14,9 +14,9 @@ COLOUR2DIR = {
     '3': -1
 }
 
+# Area = 1/2 * sum[ (x1*y2 + x2*y3 ... xn*y1) - (y1*x2 + y2*x3 ... yn*x1)]
+# Add the perimeter
 def area_from_coordinates(coordinates_list):
-    # Area = 1/2 * sum[ (x1*y2 + x2*y3 ... xn*y1) - (y1*x2 + y2*x3 ... yn*x1)]
-    # Add the perimeter
     sum_1 = sum([coordinates_list[idx].real * coordinates_list[idx+1].imag for idx, _ in enumerate(coordinates_list[:-1])])
     sum_2 = sum([coordinates_list[idx].imag * coordinates_list[idx+1].real for idx, _ in enumerate(coordinates_list[:-1])])
     sum_3 = sum([abs(coordinates_list[idx].real - coordinates_list[idx+1].real) + abs(coordinates_list[idx].imag - coordinates_list[idx+1].imag) for idx, _ in enumerate(coordinates_list[:-1])])
@@ -31,7 +31,6 @@ def convert_colour_to_instructions(colour):
 if __name__ == '__main__':
 
     coordinates_list = [0*1j]
-
     coordinates_list_swapped = [0*1j]
 
     regex = re.compile(r'(\w)\s(\d+)\s\(#(\w+)\)')
@@ -44,12 +43,5 @@ if __name__ == '__main__':
             direction, distance = convert_colour_to_instructions(colour)
             coordinates_list_swapped.append(coordinates_list_swapped[-1] + int(distance) * direction)
 
-    
     print(f'Answer part 1: {area_from_coordinates(coordinates_list)}')
-    print(f'Answer part 1: {area_from_coordinates(coordinates_list_swapped)}')
-
-
-
-
-
-   
+    print(f'Answer part 2: {area_from_coordinates(coordinates_list_swapped)}')

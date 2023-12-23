@@ -15,7 +15,16 @@ def distance_coor(coor1, coor2):
     return abs(int(coor1.real - coor2.real)) + abs(int(coor1.imag - coor2.imag))
 
 def get_next_coor_direct_from(path, boundary):
-    _, _, _, coordinates, direction, countdown = path
+    _, _, _, coordinates, direction, _, countdown = path
+
+    if countdown > 6:
+        new_coordinates = coordinates + direction
+        
+        if not new_coordinates.real < 0 and not new_coordinates.imag < 0 and not new_coordinates.real > boundary.real and not new_coordinates.imag > boundary.imag:
+            return [(coordinates + direction, direction)]
+        
+        else:
+            return []
 
     next_coordinates_directions = [(coordinates + direct, direct) for direct in ADJACENT 
                         if not (direct == -1 * direction) 
@@ -31,8 +40,8 @@ def get_score(distance, heat_loss_tot):
 
     return distance + heat_loss_tot
 
-# Part 1: pathfinding (A*, breadth search with minimise the heat loss and distance)
-# use heapq for the list of paths?
+# Part 2: pathfinding (A*, breadth search with minimise the heat loss and distance -> follow min-max countdowns: 
+# needs to move a minimum of four blocks in that direction before it can turn and can move a maximum of ten consecutive blocks without turning
 if __name__ == '__main__':
 
     map_heat_loss = {}
@@ -48,8 +57,7 @@ if __name__ == '__main__':
     start_cell = 0+0j
     end_cell = idx_line + idx_col*1j
 
-    countdown_max = 2
-    countdown_start = 2
+    countdown_max = countdown_max_start = 9
 
     direction_list = [(0+1j),(1+0j)]
 
@@ -58,8 +66,8 @@ if __name__ == '__main__':
     
     for direction in direction_list:
 
-        path_sorted_list.append((0, distance_coor(start_cell, end_cell), 0, start_cell, direction, countdown_start)) # score, distance, heat_loss_tot, coordinates, direction, countdown
-        history[(start_cell, direction, countdown_start)] = 0 # coordinates, direction: heat_loss_tot
+        path_sorted_list.append((0, distance_coor(start_cell, end_cell), 0, start_cell, direction, [start_cell], countdown_max_start)) # score, distance, heat_loss_tot, coordinates, direction, countdown
+        history[(start_cell, direction, countdown_max_start)] = 0 # coordinates, direction: heat_loss_tot
 
     min_heat_loss = int(end_cell.real * 10 + end_cell.imag * 10)
 
@@ -78,18 +86,21 @@ if __name__ == '__main__':
             # Calculate next heat loss
             next_heat_loss_tot = current_path[2] + map_heat_loss[next_coordinates]
 
+            
             # Calculate next countdown
+            next_countdown = current_path[-1]
             if current_path[4] == next_direction:
-                next_countdown = current_path[-1] -1 if current_path[-1] -1 >= 0 else countdown_max
+                next_countdown = next_countdown -1 if next_countdown -1 >= 0 else countdown_max
             else:
                 next_countdown = countdown_max
+                
 
             # If heat loss is higher than min_heat_loss, prune this branch
             if min_heat_loss <= next_heat_loss_tot:
                 continue
 
             # If the coordinates are the end cell pass to the next branch
-            if next_coordinates == end_cell:
+            if next_coordinates == end_cell and next_countdown < 7:
 
                 # Update the min_heat_loss if it is too high
                 if min_heat_loss > next_heat_loss_tot:
@@ -110,7 +121,7 @@ if __name__ == '__main__':
                 next_distance = distance_coor(end_cell, next_coordinates)
 
                 # Construct the next path
-                next_path = (get_score(next_distance, next_heat_loss_tot), next_distance, next_heat_loss_tot, next_coordinates, next_direction, next_countdown)
+                next_path = (get_score(next_distance, next_heat_loss_tot), next_distance, next_heat_loss_tot, next_coordinates, next_direction, current_path[5] + [next_coordinates], next_countdown)
                 
                 # Find where to insert the new branch (0: score, 1: distance, 2: heat loss)
                 insert_idx = bisect.insort_left(path_sorted_list, next_path, key=lambda r: (r[0], r[2], r[1]))

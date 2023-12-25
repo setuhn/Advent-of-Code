@@ -1,4 +1,6 @@
 import re
+from operator import mul
+from functools import reduce
 import timeit
 start = timeit.default_timer()
 
@@ -26,7 +28,7 @@ def update_ranges(ratings_range, evaluation, sense = True):
 
     if sense:
         if comparison == '<':
-            ratings_range[rating].intersection_update(range(1, num))
+            ratings_range[rating].intersection_update(range(0, num))
 
         elif comparison == '>':
             ratings_range[rating].intersection_update(range(num + 1, 4001))
@@ -36,7 +38,7 @@ def update_ranges(ratings_range, evaluation, sense = True):
             ratings_range[rating].intersection_update(range(num, 4001))
 
         elif comparison == '>':
-            ratings_range[rating].intersection_update(range(1, num + 1))
+            ratings_range[rating].intersection_update(range(0, num + 1))
 
 # Inspiration from day 10 for the area calculation
 if __name__ == '__main__':
@@ -101,17 +103,17 @@ if __name__ == '__main__':
 
     # print(golden_leaves)
             
-    # ratings_range_all = []
+    accepted_paths = []
+
 
     for leaf in golden_leaves:
-        # print(leaf, workflows_dict[leaf[0]].logic, workflows_dict[workflows_dict[leaf[0]].root].logic)
         ratings_range = {
-            'x': set(range(1, 4001)),
-            'm': set(range(1, 4001)),
-            'a': set(range(1, 4001)),
-            's': set(range(1, 4001))
-        }
-        
+            'x': set(range(0, 4001)),
+            'm': set(range(0, 4001)),
+            'a': set(range(0, 4001)),
+            's': set(range(0, 4001))
+        }   
+        # print(leaf, workflows_dict[leaf[0]].logic, workflows_dict[workflows_dict[leaf[0]].root].logic)
         current_name, evaluation = leaf
 
         # If evaluation contains a rule, updates the range
@@ -131,20 +133,43 @@ if __name__ == '__main__':
             evaluation = [evaluation for evaluation in workflows_dict[root].logic if current_name in evaluation]
 
             if evaluation:
-                print(evaluation)
+                # print(evaluation)
                 evaluation = evaluation[0]
                 
-                 # If evaluation contains a rule, updates the range
-                if evaluation != 'A':
+                 # If evaluation contains a rule (all except last one), updates the range
+                if evaluation != workflows_dict[root].logic[-1]:
                     update_ranges(ratings_range, evaluation)
 
-                # Otherwise, update the opposite of the logic
+                # Otherwise, update the opposite of the logic (last element of the logic)
                 else:
-                    for eval in workflows_dict[current_name].logic[:-1]:
+                    for eval in workflows_dict[root].logic[:-1]:
                         update_ranges(ratings_range, eval, False)
 
             root, current_name = workflows_dict[root].root, root
+        
+        accepted_paths.append(ratings_range)
 
+    # For each rating range, compare them (difference) to the ratings main. if the rating is not completely encompassed 
+    # in the rating main, calculate the combination with all the rating ranges but replace the non encosed one with the difference
+    # Only do this once. Add differences for all the ratings to the ratings main 
+    
+    # The first paths can be directly added and its combinations directly calculated
+    ratings_range_main = accepted_paths[0]
+    combination = reduce(mul,[max(rating) - min(rating) for rating in ratings_range_main.values()])
+
+    # Iterate over all the possible paths for success
+    for path in accepted_paths[1:]:
+        # In these paths, iterate over the ranges for each rating
+        for label in ratings_range:
+            # If a range in not entirely encompassed in the main ratings_range
+            if ratings_range_main[label].difference(path[label]) != 0:
+                # iterate over all the ranges of this path to calculate the combination replacing only the found 
+                for k in path:
+                    break
+
+        print()
+    
+    # print(combination, combination == 167409079868000, 4000**4)
             
 
     # # combination = 1

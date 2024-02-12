@@ -1,24 +1,49 @@
 Theory
 - path finding algo (A*, Dijkstra, breadth/depth search) https://www.geeksforgeeks.org/breadth-first-search-or-bfs-for-a-graph/, https://www.geeksforgeeks.org/depth-first-search-or-dfs-for-a-graph/
 - bitwise operations
+-- !(https://stackoverflow.com/questions/37053379/times-two-faster-than-bit-shift-for-python-3-x-integers)
 - set operations
 - binary search instead of x in lst or use sets for fast searching
 - Dynamic Programming
-- imaginry numbers for directions or coordinates (https://realpython.com/python-complex-numbers)
+- imaginary numbers for directions or coordinates (https://realpython.com/python-complex-numbers)
 
 Functional
 - map() -> list comprehension
 - filter() -> list comprehension
 - reduce() -> functools
 - itertools
+    - flatten list: [item for sublist in list2d for item in sublist] OR list(itertools.chain.from_iterable(list2d))
 - regular expressions: https://regexr.com/ and https://regex101.com/
+- string translation: s.translate(str.maketrans('ABC', '123'))
+- * operator when unpacking variable (list, tuple, etc.)
+- math.prod()
+- int.bit_count()
 
 Tools
 - itertools
-- pandas
+- pandas / polars (Rust)
 - numpy
-- collections (deque -> rotating deque, Josephus Permutation)
+- collections (deque -> rotating deque, Josephus Permutation; Counter -> count: intersection (&) works with Counter)
 - re
 - string
 - heapq
 - Numba
+- math (factorial, floor, ceil, prod, sumprod, comb, perm, gcd, lcm, ...)
+- bisect
+
+Algo -> always try to find a math solution to speed up calculations
+- sum(range(num + 1)) = (1+num) * num / 2
+- Sum Identities in general: https://en.wikipedia.org/wiki/Summation#Identities
+- Product of Sequence: https://en.wikipedia.org/wiki/Multiplication#Product_of_a_sequence
+- Exponentiation: https://en.wikipedia.org/wiki/Exponentiation
+- S = n(a + l)/2 : where, S = sum of the consecutive integer, n = number of integers, a = first term, l = last term (https://www.cuemath.com/sum-of-integers-formula/)
+- is_prime (n): Miller_Rabin (works for super large n)
+- prime number generation: Sieve_Eratosthenes (fast, use a lot of memory), Trial_Division (slow, use a little memory), Dijkstra's approach (mid-speed, mid-memory), [https://www.youtube.com/watch?v=fwxjMKBMR7s]
+- calculation of combinations (math.comb): the number of combinations of n items taken k at a time (pronounced n choose k) can be found by the equation :  n! /(k! * (n - k)!) -> Pascal's Triangle (https://en.wikipedia.org/wiki/Pascal's_triangle#Combinations)
+
+Other
+- xor: a!= b
+- find the missing number in a list(0...n): 
+    def find_missing_number(a):
+        n = len(a) + 1 # calculate the max
+        return n * (n + 1) // 2 - sum(a) # use the sum identity to get what the sum should be and substract what the sum actually is
